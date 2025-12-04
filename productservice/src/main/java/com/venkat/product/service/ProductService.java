@@ -7,39 +7,53 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Validated
 public class ProductService {
+	
     @Autowired
     private ProductRepository productRepository;
 
+    public Product createProduct(Product product) {
+        return productRepository.saveProduct(product);
+    }
+
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.allProduct();
     }
 
     public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+        return Optional.ofNullable(productRepository.getProductById(id));
     }
 
-    public Product createProduct(@Valid Product product) {
-        return productRepository.save(product);
-    }
-
-    public Product updateProduct(Long id, @Valid Product product) {
-        if (!productRepository.existsById(id)) {
-            throw new ValidationException("Product not found");
+    public Product updateProduct(Long id, Product product) {
+        Product existingProduct = productRepository.getProductById(id);
+        if (existingProduct == null) {
+            throw new RuntimeException("Product not found with id: " + id);
         }
-        product.setId(id);
-        return productRepository.save(product);
+        if (product.getName() != null) {
+            existingProduct.setName(product.getName());
+        }
+        if (product.getPrice() != null) {
+            existingProduct.setPrice(product.getPrice());
+        }
+        if (product.getDescription() != null) {
+            existingProduct.setDescription(product.getDescription());
+        }
+        return productRepository.saveProduct(existingProduct);
     }
 
     public void deleteProduct(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ValidationException("Product not found");
+        Product product = productRepository.getProductById(id);
+        if (product == null) {
+            throw new RuntimeException("Product not found with id: " + id);
         }
-        productRepository.deleteById(id);
+        // Since we're using HashMap, we need to add a delete method to the repository
+        // For now, we'll handle it here by calling a repository method
+        productRepository.deleteProduct(id);
     }
 }
