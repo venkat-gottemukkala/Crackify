@@ -1,6 +1,0 @@
-INSERT INTO product (name, price, description) VALUES
-('Apple iPhone 15', 799.99, 'Latest Apple smartphone with advanced features'),
-('Samsung Galaxy S24', 699.99, 'Flagship Samsung phone with AMOLED display'),
-('Sony WH-1000XM5', 349.99, 'Noise-cancelling wireless headphones'),
-('Dell XPS 13', 1199.00, 'Ultra-thin laptop with Intel i7 processor'),
-('Logitech MX Master 3', 99.99, 'Ergonomic wireless mouse for productivity');

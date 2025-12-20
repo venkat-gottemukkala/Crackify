@@ -1,75 +1,57 @@
 package com.venkat.product.controller;
 
-import com.venkat.product.model.Product;
-import com.venkat.product.service.ProductService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.venkat.product.model.Product;
+import com.venkat.product.service.ProductService;
+
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("products")
 public class ProductController {
-    @Autowired
-    private ProductService productService;
 
-    @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
-    }
+	private final ProductService productService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable Long id) {
-        Optional<Product> product = productService.getProductById(id);
-        if (product.isPresent()) {
-            return ResponseEntity.ok(product.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
-        }
-    }
+	public ProductController(ProductService productService) {
+		this.productService = productService;
+	}
 
-    @PostMapping
-    public ResponseEntity<?> createProduct(@Valid @RequestBody Product product, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(getValidationErrors(result));
-        }
-        return new ResponseEntity<>(productService.createProduct(product), HttpStatus.CREATED);
-    }
+	@PostMapping()
+	public Product createProduct(@Valid @RequestBody Product product) {
+		Product savedProduct = productService.saveProduct(product);
+		return savedProduct;
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(getValidationErrors(result));
-        }
-        try {
-            return ResponseEntity.ok(productService.updateProduct(id, product));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
+	@GetMapping("/all")
+	public List<Product> findAllProducts() {
+		return productService.getAllProducts();
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-        try {
-            productService.deleteProduct(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
+	@GetMapping("/{id}")
+	public Optional<Product> findById(@PathVariable Long id) {
+		return productService.getProductById(id);
+	}
 
-    private Map<String, String> getValidationErrors(BindingResult result) {
-        Map<String, String> errors = new HashMap<>();
-        result.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
-        return errors;
-    }
+	@PutMapping("/{id}") 
+	public Optional<Object> updateProductById(@PathVariable Long id, @RequestBody Product updateProduct){
+	 return  productService.updateProduct(id, updateProduct);
+	}
+	
+	@DeleteMapping("/{id}")
+	public boolean deleteProductById(@PathVariable Long id) {
+		return productService.deleteProduct(id);
+	}
+	
+
 }
